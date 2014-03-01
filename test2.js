@@ -35,7 +35,7 @@ function PointCollection() {
     };
 
     this.update = function () {
-        for(var i=0; ithis.points.length; i++) {
+        for(var i=0; i<this.points.length; i++) {
             var point = this.points[i];
 
             if (point === null) {
@@ -44,12 +44,12 @@ function PointCollection() {
 
             var dx = this.mousePos.x - point.curPos.x;
             var dy = this.mousePos.y - point.curPos.y;
-            var dd = (dx  dx) + (dy  dy);
+            var dd = (dx * dx) + (dy * dy);
             var d = Math.sqrt(dd);
 
-            if (d  150) {
-                point.targetPos.x = (this.mousePos.x  point.curPos.x)  point.curPos.x - dx  point.curPos.x - dx;
-                point.targetPos.y = (this.mousePos.y  point.curPos.y)  point.curPos.y - dy  point.curPos.y - dy;
+            if (d < 150) {
+                point.targetPos.x = (this.mousePos.x < point.curPos.x) ? point.curPos.x - dx : point.curPos.x - dx;
+                point.targetPos.y = (this.mousePos.y < point.curPos.y) ? point.curPos.y - dy : point.curPos.y - dy;
             }
             else {
                 point.targetPos.x = point.originalPos.x;
@@ -61,9 +61,9 @@ function PointCollection() {
     }
 
     this.shake = function() {
-        var randomNum = Math.floor(Math.random()  5) - 2;
+        var randomNum = Math.floor(Math.random() * 5) - 2;
 
-        for(var i=0; ithis.points.length; i++) {
+        for(var i=0; i<this.points.length; i++) {
             var point = this.points[i];
 
             if(point === null) {
@@ -72,20 +72,20 @@ function PointCollection() {
 
             var dx = this.mousePos.x - point.curPos.x;
             var dy = this.mousePos.y - point.curPos.y;
-            var dd = (dx  dx) + (dy  dy);
+            var dd = (dx * dx) + (dy * dy);
             var d = Math.sqrt(dd);
-            if(d  50) {
-                point.curPos.x = point.originalPos.x + randomNum;
-                point.curPos.y = point.originalPos.y + randomNum;
-                this.pointCollectionX = Math.floor(Math.random()  5) - 2;
-                this.pointCollectionY = Math.floor(Math.random()  5) - 2;
+            if(d < 50) {
+                //point.curPos.x = point.originalPos.x + randomNum;
+                //point.curPos.y = point.originalPos.y + randomNum;
+                this.pointCollectionX = Math.floor(Math.random() * 5) - 2;
+                this.pointCollectionY = Math.floor(Math.random() * 5) - 2;
             }
             point.draw(bubbleShape, this.pointCollectionX, this.pointCollectionY);
         }
     }
 
     this.draw = function (bubbleShape, reset) {
-        for (var i = 0; i  this.points.length; i++) {
+        for (var i = 0; i < this.points.length; i++) {
             var point = this.points[i];
 
             if (point === null)
@@ -98,7 +98,7 @@ function PointCollection() {
             }
 
             point.draw(bubbleShape, this.pointCollectionX, this.pointCollectionY, reset);
-            point.draw(bubbleShape);
+            //point.draw(bubbleShape);
         }
     }
 
@@ -124,49 +124,49 @@ function Point(x, y, z, size, color) {
     this.update = function () {
         var dx = this.targetPos.x - this.curPos.x;
         var dy = this.targetPos.y - this.curPos.y;
-         Orthogonal vector is [-dy,dx]
-        var ax = dx  this.springStrength - this.rotationForce  dy;
-        var ay = dy  this.springStrength + this.rotationForce  dx;
+        // Orthogonal vector is [-dy,dx]
+        var ax = dx * this.springStrength - this.rotationForce * dy;
+        var ay = dy * this.springStrength + this.rotationForce * dx;
 
         this.velocity.x += ax;
-        this.velocity.x = this.friction;
+        this.velocity.x *= this.friction;
         this.curPos.x += this.velocity.x;
 
         this.velocity.y += ay;
-        this.velocity.y = this.friction;
+        this.velocity.y *= this.friction;
         this.curPos.y += this.velocity.y;
 
         var dox = this.originalPos.x - this.curPos.x;
         var doy = this.originalPos.y - this.curPos.y;
-        var dd = (dox  dox) + (doy  doy);
+        var dd = (dox * dox) + (doy * doy);
         var d = Math.sqrt(dd);
 
-        this.targetPos.z = d  100 + 1;
+        this.targetPos.z = d / 100 + 1;
         var dz = this.targetPos.z - this.curPos.z;
-        var az = dz  this.springStrength;
+        var az = dz * this.springStrength;
         this.velocity.z += az;
-        this.velocity.z = this.friction;
+        this.velocity.z *= this.friction;
         this.curPos.z += this.velocity.z;
 
-        this.radius = this.size  this.curPos.z;
-        if (this.radius  1) this.radius = 1;
+        this.radius = this.size * this.curPos.z;
+        if (this.radius < 1) this.radius = 1;
     }
 
     this.draw = function(bubbleShape, dx, dy) {
         ctx.fillStyle = this.color;
-        if(bubbleShape == square) {
+        if(bubbleShape == "square") {
             ctx.beginPath();
-            ctx.fillRect(this.curPos.x+dx, this.curPos.y+dy, this.radius1.5, this.radius1.5);
+            ctx.fillRect(this.curPos.x+dx, this.curPos.y+dy, this.radius*1.5, this.radius*1.5);
         }
         else {
             ctx.beginPath();
-            ctx.arc(this.curPos.x+dx, this.curPos.y+dy, this.radius, 0, Math.PI  2, true);
+            ctx.arc(this.curPos.x+dx, this.curPos.y+dy, this.radius, 0, Math.PI * 2, true);
             ctx.fill();
         }
     }
 }
 
-var canvas = $(#myCanvas);
+var canvas = $("#myCanvas");
 var canvasHeight = 500;
 var canvasWidth = 1000;
 var screenWidth = canvasWidth;
@@ -178,8 +178,8 @@ var pointCollection;
 document.rotationForce = 0.0;
 document.Friction = 0.85;
 
-
- RGB
+/*
+// RGB
 var white = [255, 255, 255];
 var black = [68, 68, 68];
 var red = [255, 68, 68];
@@ -187,9 +187,9 @@ var orange = [255, 187, 51];
 var green = [153, 204, 0];
 var blue = [51, 181, 229];
 var purple = [170, 102, 204];
+*/
 
-
- HSL
+// HSL
 var white = [0, 0, 100];
 var black = [0, 0, 27];
 var red = [0, 100, 63];
@@ -203,15 +203,15 @@ var offset = 0;
 var mouseX = 0;
 
 function makeColor(hslList, fade) {
-    var hue = hslList[0] - 17.0  fade  1000.0;
-    var sat = hslList[1] + 81.0  fade  1000.0;
-    var lgt = hslList[2] + 58.0  fade  1000.0;
-    return hsl(+hue+,+sat+%,+lgt+%);
+    var hue = hslList[0] /*- 17.0 * fade / 1000.0*/;
+    var sat = hslList[1] /*+ 81.0 * fade / 1000.0*/;
+    var lgt = hslList[2] /*+ 58.0 * fade / 1000.0*/;
+    return "hsl("+hue+","+sat+"%,"+lgt+"%)";
 }
 
 function phraseToHex(phrase) {
-    var hexphrase = ;
-    for(var i=0; iphrase.length; i++) {
+    var hexphrase = "";
+    for(var i=0; i<phrase.length; i++) {
         hexphrase += phrase.charCodeAt(i).toString(16);
     }
     return hexphrase;
@@ -231,7 +231,7 @@ function initEventListeners() {
 }
 
 function updateCanvasDimensions() {
-    canvas.attr({height 500, width 1000});
+    canvas.attr({height: 500, width: 1000});
     canvasWidth = canvas.width();
     canvasHeight = canvas.height();
 
@@ -252,13 +252,13 @@ function onTouchMove(e) {
 
 function bounceName() {
     shake();
-    update();
+    //update();
 
     setTimeout(function() { bounceName() }, 30);
 }
 
 function stopName() {
-     pass
+    // pass
 }
 
 function bounceBubbles() {
@@ -269,7 +269,7 @@ function bounceBubbles() {
 }
 
 function stopBubbles() {
-     pass
+    // pass
 }
 
 function draw(reset) {
@@ -282,7 +282,7 @@ function draw(reset) {
     ctx = tmpCanvas.getContext('2d');
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    bubbleShape = typeof bubbleShape !== 'undefined'  bubbleShape  circle;
+    bubbleShape = typeof bubbleShape !== 'undefined' ? bubbleShape : "circle";
 
     if (pointCollection) {
         pointCollection.draw(bubbleShape, reset);
@@ -299,7 +299,7 @@ function shake() {
     ctx = tmpCanvas.getContext('2d');
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    bubbleShape = typeof bubbleShape !== 'undefined'  bubbleShape  circle;
+    bubbleShape = typeof bubbleShape !== 'undefined' ? bubbleShape : "circle";
 
     if (pointCollection) {
         pointCollection.shake(bubbleShape);
@@ -311,7 +311,7 @@ function update() {
         pointCollection.update();
 }
 
-$(#myCanvas).keypress(function(event) {
+$("#myCanvas").keypress(function(event) {
     console.log(e);
 });
 
@@ -323,12 +323,12 @@ function drawName(name, letterColors) {
 
     function addLetter(cc_hex, ix, letterCols) {
         if(typeof letterCols !== 'undefined') {
-             letterColors = [red, white, blue] 
+            /* letterColors = [red, white, blue] */
             if(Object.prototype.toString.call(letterCols) === '[object Array]' && Object.prototype.toString.call(letterCols[0]) === '[object Array]') {
                 letterColors = letterCols;
             }
-             letterColors = red 
-            if(Object.prototype.toString.call(letterCols) === '[object Array]' && typeof letterCols[0] === number) {
+            /* letterColors = red */
+            if(Object.prototype.toString.call(letterCols) === '[object Array]' && typeof letterCols[0] === "number") {
                 letterColors = [letterCols];
             }
         }
@@ -340,7 +340,7 @@ function drawName(name, letterColors) {
             var chr_data = document.alphabet[cc_hex].P;
             var bc = letterColors[ix % letterColors.length];
 
-            for (var i=0; ichr_data.length; ++i) {
+            for (var i=0; i<chr_data.length; ++i) {
                 point = chr_data[i];
 
                 g.push(new Point(point[0]+offset,
@@ -356,25 +356,25 @@ function drawName(name, letterColors) {
     var hexphrase = phraseToHex(name);
 
     var col_ix = -1;
-    for(var i=0; ihexphrase.length; i+=2) {
-        var cc_hex = A + hexphrase.charAt(i) + hexphrase.charAt(i+1);
-        if(cc_hex != A20) {
+    for(var i=0; i<hexphrase.length; i+=2) {
+        var cc_hex = "A" + hexphrase.charAt(i) + hexphrase.charAt(i+1);
+        if(cc_hex != "A20") {
             col_ix++;
         }
         addLetter(cc_hex, col_ix, letterColors);
     }
 
-    for (var j=0; jg.length; j++) {
-        g[j].curPos.x = (canvasWidth2 - offset2) + g[j].curPos.x;
-        g[j].curPos.y = (canvasHeight2 - 180) + g[j].curPos.y;
-        g[j].originalPos.x = (canvasWidth2 - offset2) + g[j].originalPos.x;
-        g[j].originalPos.y = (canvasHeight2 - 180) + g[j].originalPos.y;
+    for (var j=0; j<g.length; j++) {
+        g[j].curPos.x = (canvasWidth/2 - offset/2) + g[j].curPos.x;
+        g[j].curPos.y = (canvasHeight/2 - 180) + g[j].curPos.y;
+        g[j].originalPos.x = (canvasWidth/2 - offset/2) + g[j].originalPos.x;
+        g[j].originalPos.y = (canvasHeight/2 - 180) + g[j].originalPos.y;
     }
 
     pointCollection = new PointCollection();
     pointCollection.points = g;
     initEventListeners();
-    timeout();
+    //timeout();
 }
 
 setTimeout(function () {
